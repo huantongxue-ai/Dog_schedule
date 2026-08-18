@@ -68,10 +68,10 @@
   .greet .add { position: absolute; top: 16px; right: 16px; z-index: 2; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px; background: var(--accent); color:var(--on-accent); font-size: 13px; font-weight: 700; padding: 9px 15px 9px 12px; border-radius: 999px; box-shadow: var(--shadow-overlay); transition: transform .12s, filter .15s; }
   .greet .add:active { transform: scale(.95); filter: brightness(1.15); } .greet .add svg { margin-top: -1px; }
 
-  .quote { margin-top: 16px; padding: 16px 18px; border-radius: var(--radius-card); background: linear-gradient(135deg, #fefcf8 0%, #f8f6ff 100%); border: 1px solid color-mix(in srgb, var(--module-5) 22%, var(--border)); box-shadow: var(--shadow-card); position: relative; }
-  .quote::before { content:""; position:absolute; left:0; top:14px; bottom:14px; width:3px; border-radius:2px; background: linear-gradient(180deg, var(--accent), var(--module-5)); }
-  .quote .tag { display:inline-flex; align-items:center; gap:6px; font-size: 11px; font-weight: 700; color: var(--text-secondary); letter-spacing: .04em; margin-bottom: 9px; } .quote .tag svg { color: var(--text-tertiary); }
-  .quote .txt { font-size: 16px; font-weight: 600; line-height: 1.55; color: var(--text); }
+  
+  
+  
+  
 
   .rings { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 20px 6px; margin-top: 14px; }
   .ring { display:flex; flex-direction:column; align-items:center; gap: 8px; cursor:pointer; }
@@ -191,7 +191,7 @@
     .greet h1 { font-size: 32px; } .greet p { font-size: 14px; }
     .greet .add { top: 20px; right: 20px; }
     .bureau-badge { font-size: 12px; padding: 5px 13px; }
-    .quote { padding: 22px 24px; border-radius: 20px; } .quote .txt { font-size: 18px; }
+    
     .sec-title { font-size: 15px; margin: 30px 4px 14px; }
     .card { border-radius: 20px; }
     .rings { gap: 8px; padding: 24px 8px; }
@@ -259,15 +259,6 @@
 const CONFIG = {
   storageKey: "time-bureau-dog-mobile-v3",
   owner: "时间管理局", slogan: "Time Bureau · 狗狗日程报", brand: "🐕",
-  quotes: [
-    "新的时间循环已启动，小狗副局长已就位！",
-    "时间线稳定，今日任务推进中。",
-    "把大目标拆成小步骤，时空跳跃更稳。",
-    "坚持到一半时，时间管理局为你加油。",
-    "收个尾，给这周的时间线画上句号。",
-    "时间暂停模式，小狗也要好好休息。",
-    "复盘时间线，为下周的旅程校准方向。",
-  ],
   overview: [
     { key: "tasks", label: "任务队列", icon: "bolt", color: "var(--module-2)",
       calc: d => { const it=d.tasks||[]; const t=today(); const archived=(d.archive||[]).filter(a=>a.date===t&&a.category!=="goal").length; const total=it.length+archived; return { value: total?Math.round(archived/total*100):0, sub: `${it.length} 待办` }; } },
@@ -655,7 +646,7 @@ function ringSVG(pct, color){ const r=25, c=2*Math.PI*r, off=c*(1-Math.min(100,p
 
 /* ---------- HOME ---------- */
 function renderHome(){
-  const now=new Date(); const dow=(now.getDay()+6)%7; const q=CONFIG.quotes[dow%CONFIG.quotes.length];
+  const now=new Date();
   const hour=now.getHours(); const hi=hour<5?"夜深了":hour<11?"早上好":hour<13?"中午好":hour<18?"下午好":"晚上好";
   const rings=CONFIG.overview.map(o=>{ const r=o.calc(data); return `<div class="ring" data-open="${o.key}"><div class="dial">${ringSVG(r.value,o.color)}<span class="mid" style="color:${o.color}">${icon(o.icon,23)}</span></div><div class="pct">${r.value}%</div><div class="lbl">${o.label}</div><div class="sub">${r.sub}</div></div>`; }).join("");
 
@@ -683,7 +674,6 @@ function renderHome(){
   $("#screen").innerHTML=`
     <div class="greet"><div><span class="bureau-badge">🐶 时间管理局</span><h1>${hi}</h1><p>欢迎回到${CONFIG.owner}</p></div></div>
     ${alertBanner}
-    <div class="quote"><span class="tag">${icon("quote",13)} 今日时空讯息</span><div class="txt">${esc(q)}</div></div>
     <div class="sec-title">今日状态总览</div><div class="card rings">${rings}</div>
     <div class="sec-title">优先任务</div><div class="pin-list">${pinned}</div>
     <div class="sec-title">快速记录</div><div class="quick-grid">${quick}</div>`;
