@@ -29,13 +29,13 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   :focus-visible { outline: 2px solid var(--module-2); outline-offset: 2px; border-radius: 4px; }
-  html, body { height: 100%; } html { background: var(--drawer-bg); }
+  html, body { height: 100%; } html { background: var(--page-bg); }
   body {
     background-color: var(--page-bg);
     background-image: linear-gradient(rgba(37,99,235,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(37,99,235,.045) 1px, transparent 1px);
     background-size: 24px 24px;
     color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased;
-    max-width: 480px; margin: 0 auto; position: relative; min-height: 100vh; overflow-x: hidden;
+    max-width: 480px; margin: 0 auto; position: relative; min-height: 100dvh; overflow-x: hidden;
   }
   body::before { content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; background-image: var(--page-texture); background-size: cover; opacity:.5; }
   .app { padding: 0 16px calc(var(--nav-h) + 26px); } svg { display: block; }
