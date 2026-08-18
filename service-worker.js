@@ -1,5 +1,5 @@
 const CACHE_NAME = "time-bureau-v3";
-const HTML_FILES = ["index.html", "workbench-mobile.html"];
+const HTML_FILES = ["index.html"];
 const STATIC_ASSETS = ["manifest.json", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", (event) => {

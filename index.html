@@ -192,6 +192,59 @@
   .link-danger { color: var(--danger); background:none; border:none; font-size: 14px; font-weight: 600; cursor:pointer; }
   .bar-list { display:flex; flex-direction:column; gap:11px; margin-top:14px; } .bar-row { display:flex; align-items:center; gap:10px; } .bar-ic { width:30px; height:30px; border-radius:var(--radius-tile); display:grid; place-items:center; flex:0 0 auto; background:var(--surface-nested); border:1px solid var(--border); } .bar-name { font-size:13px; font-weight:600; flex:0 0 auto; color:var(--text); } .bar-row .pbar { flex:1; margin:0; height:7px; } .bar-pct { font-size:12px; font-weight:600; color:var(--text-secondary); width:54px; text-align:right; flex:0 0 auto; }
   .hint { font-size:11px; color:var(--module-3); margin:6px 0 13px; padding:8px 10px; background:var(--danger-muted); border-radius:8px; line-height:1.5; } .hidden { display: none !important; }
+
+  /* ===== Desktop Responsive ===== */
+  @media (min-width: 768px) {
+    html { background: #f1f5f9; }
+    body { max-width: 920px; border-radius: 24px; box-shadow: 0 8px 60px rgba(10,24,52,.10); margin: 24px auto; min-height: calc(100dvh - 48px); border: 1px solid var(--border); }
+    .app { padding: 0 28px calc(var(--nav-h) + 52px); }
+    .topbar { padding: 20px 4px 16px; }
+    .topbar .title { font-size: 19px; } .topbar .title small { font-size: 12px; }
+    .greet { padding: 30px 28px 32px; min-height: 172px; border-radius: 20px; }
+    .greet h1 { font-size: 32px; } .greet p { font-size: 14px; }
+    .greet .add { top: 20px; right: 20px; }
+    .bureau-badge { font-size: 12px; padding: 5px 13px; }
+    .quote { padding: 22px 24px; border-radius: 20px; } .quote .txt { font-size: 18px; }
+    .sec-title { font-size: 15px; margin: 30px 4px 14px; }
+    .card { border-radius: 20px; }
+    .rings { gap: 8px; padding: 24px 8px; }
+    .ring .dial { width: 80px; height: 80px; } .ring .dial svg.gauge { width: 80px; height: 80px; }
+    .ring .pct { font-size: 17px; } .ring .lbl { font-size: 13px; }
+    .pin-list { display:grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+    .quick-grid { gap: 12px; }
+    .qbtn { padding: 18px 8px 14px; border-radius: 16px; }
+    .qbtn .e { width: 50px; height: 50px; }
+    .panel { border-radius: 20px; padding: 18px; }
+    .rec { border-radius: 16px; padding: 16px 18px; margin-bottom: 0; transition: border-color .15s, opacity .25s, transform .25s, box-shadow .2s; }
+    .rec:hover { border-color: var(--border-input); box-shadow: 0 4px 20px rgba(37,99,235,.08); }
+    .rec-list { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; }
+    .rec-list .empty { grid-column: 1/-1; }
+    .rec .rname { font-size: 15px; }
+    .hero { padding: 16px 18px; border-radius: 16px; }
+    .hero-v { font-size: 22px; }
+    .mini { padding: 14px; border-radius: 14px; } .mini .v { font-size: 20px; }
+    .mod-tabs { border-radius: 14px; padding: 4px; } .mod-tabs .tab { padding: 11px 6px; font-size: 14px; }
+    .nav { max-width: 560px; border-radius: 999px; bottom: 24px; box-shadow: 0 8px 32px rgba(10,24,52,.14); border: 1px solid var(--border); width: calc(100% - 56px); }
+    .nav .n { font-size: 11px; }
+    .overlay { align-items: center; padding: 24px; }
+    .modal { max-width: 560px; border-radius: 24px; padding: 28px 26px; animation: pop .24s cubic-bezier(.2,.8,.25,1); }
+    @keyframes pop { from { transform: scale(.96); opacity:0; } }
+    .modal .grab { display: none; }
+    .modal h2 { font-size: 20px; }
+    .alert-banner { border-radius: 20px; padding: 16px 18px; }
+    input, select, textarea { font-size: 15px; padding: 12px 14px; border-radius: 14px; }
+    .btn { padding: 14px; border-radius: 14px; }
+    .empty { padding: 56px 24px; }
+    .empty .e { width: 64px; height: 64px; }
+    .icon-btn { width: 40px; height: 40px; }
+    .date-chip { padding: 8px 14px; font-size: 13px; }
+  }
+  @media (min-width: 1024px) {
+    body { max-width: 1040px; }
+    .pin-list { grid-template-columns: repeat(3,1fr); }
+    .rec-list { grid-template-columns: repeat(3,1fr); }
+    .quick-grid { grid-template-columns: repeat(4,1fr); max-width: 560px; }
+  }
 </style>
 </head>
 <body>
@@ -670,7 +723,7 @@ function renderModule(key){
   const it=data[key]||[]; const t=today(); let head="";
   if(m.type==="progress"){ const p=avgProgress(it); head=headHero(m,`${p.value}%`,`平均进度 · ${it.length} 项`,p.value); }
   const body=it.length?it.map(x=>recHTML(m,x)).join(""):`<div class="empty"><span class="e">${icon(m.icon,26)}</span><div>还没有记录，点上方「新建」添加第一条吧</div></div>`;
-  $("#screen").innerHTML=`<div class="greet"><div><span class="bureau-badge">🐶 ${CONFIG.owner}</span><h1>${m.name}</h1><p>${m.desc}</p></div><button class="add" id="btn-add">${icon("plus",16,2.2)}新建</button></div><div style="margin-top:16px">${head}<div class="sec-title">记录</div>${body}</div>`;
+  $("#screen").innerHTML=`<div class="greet"><div><span class="bureau-badge">🐶 ${CONFIG.owner}</span><h1>${m.name}</h1><p>${m.desc}</p></div><button class="add" id="btn-add">${icon("plus",16,2.2)}新建</button></div><div style="margin-top:16px">${head}<div class="sec-title">记录</div><div class="rec-list">${body}</div></div>`;
   wireModule(key);
 }
 
@@ -700,7 +753,7 @@ function renderTasksModule(key){
   }
 
   const addBtn=showAdd?`<button class="add" id="btn-add">${icon("plus",16,2.2)}新建</button>`:'';
-  $("#screen").innerHTML=`<div class="greet"><div><span class="bureau-badge">🐶 ${CONFIG.owner}</span><h1>${m.name}</h1><p>${m.desc}</p></div>${addBtn}</div><div style="margin-top:16px">${head}${tabs}<div class="sec-title">记录</div>${body}</div>`;
+  $("#screen").innerHTML=`<div class="greet"><div><span class="bureau-badge">🐶 ${CONFIG.owner}</span><h1>${m.name}</h1><p>${m.desc}</p></div>${addBtn}</div><div style="margin-top:16px">${head}${tabs}<div class="sec-title">记录</div><div class="rec-list">${body}</div></div>`;
   wireTasksModule(key,tab);
 }
 
