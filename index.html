@@ -260,11 +260,12 @@ const CONFIG = {
   storageKey: "time-bureau-dog-mobile-v3",
   owner: "时间管理局", slogan: "Time Bureau · 狗狗日程报", brand: "🐕",
   overview: [
-    { key: "tasks", label: "任务队列", icon: "bolt", color: "var(--module-2)",
-      calc: d => { const it=d.tasks||[]; const t=today(); const archived=(d.archive||[]).filter(a=>a.date===t&&a.category!=="goal").length; const total=it.length+archived; return { value: total?Math.round(archived/total*100):0, sub: `${it.length} 待办` }; } },
-    { key: "goal", label: "长期目标", icon: "target", color: "var(--module-3)", calc: d => avgProgress(d.goal) },
     { key: "growth", label: "个人成长", icon: "leaf", color: "var(--module-1)",
       calc: d => { const goals=(d.goal||[]).filter(g=>g.unit==="天"); const t=today(); const done=goals.filter(g=>g.log&&g.log[t]).length; return { value: goals.length?Math.round(done/goals.length*100):0, sub: `${done}/${goals.length} 项` }; } },
+    { key: "work", label: "工作任务", icon: "bolt", color: "var(--module-2)",
+      calc: d => { const it=(d.tasks||[]).filter(x=>x.category==="work"); const t=today(); const archived=(d.archive||[]).filter(a=>a.date===t&&a.category==="work").length; const total=it.length+archived; return { value: total?Math.round(archived/total*100):0, sub: `${it.length} 待办` }; } },
+    { key: "daily", label: "日常生活", icon: "list", color: "var(--accent)",
+      calc: d => { const it=(d.tasks||[]).filter(x=>x.category==="daily"); const t=today(); const archived=(d.archive||[]).filter(a=>a.date===t&&a.category==="daily").length; const total=it.length+archived; return { value: total?Math.round(archived/total*100):0, sub: `${it.length} 待办` }; } },
     { key: "archive", label: "今日归档", icon: "check", color: "var(--module-5)",
       calc: d => { const t=today(); const n=(d.archive||[]).filter(a=>a.date===t).length; return { value: n>0?100:0, sub: `${n} 条` }; } },
   ],
@@ -683,7 +684,7 @@ function renderHome(){
 
 
 function wireHome(){
-  $("#screen").querySelectorAll("[data-open]").forEach(el=>el.onclick=()=>{ const t=el.dataset.open; if(t==="growth"){ modOf("tasks")._tab="growth"; go("tasks"); } else go(t); });
+  $("#screen").querySelectorAll("[data-open]").forEach(el=>el.onclick=()=>{ const t=el.dataset.open; if(t==="growth"||t==="work"||t==="daily"){ modOf("tasks")._tab=t; go("tasks"); } else go(t); });
   $("#screen").querySelectorAll("[data-quick]").forEach(el=>el.onclick=()=>{ const mod=el.dataset.quick, tab=el.dataset.tab; if(mod==="tasks"&&tab){ modOf("tasks")._tab=tab; go("tasks"); openEditor("tasks",null,tab); } else if(mod==="archive"){ go("archive"); } else { go(mod); openEditor(mod,null); } });
   const findTask=el=>(data.tasks||[]).find(i=>i.id==el.dataset.id);
   const findGoal=el=>(data.goal||[]).find(i=>i.id==el.dataset.id);
