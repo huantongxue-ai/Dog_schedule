@@ -1,6 +1,6 @@
-const CACHE_NAME = "time-bureau-v3";
+const CACHE_NAME = "time-bureau-v4";
 const HTML_FILES = ["index.html"];
-const STATIC_ASSETS = ["manifest.json", "icon-192.png", "icon-512.png"];
+const STATIC_ASSETS = ["manifest.json", "icon-192.png", "icon-512.png", "assets/greet-banner.jpg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
