@@ -18,7 +18,6 @@
     --accent: #2563eb; --accent-muted: #dbeafe; --on-accent: #ffffff;
     --module-1: #0d9488; --module-2: #6366f1; --module-3: #f59e0b; --module-4: #ec4899; --module-5: #8b5cf6;
     --danger: #ef4444; --danger-muted: #fef2f2;
-    --greet-image: url('assets/greet-banner.jpg');
     --radius-control: 8px; --radius-tile: 12px; --radius-card: 16px; --radius-sheet: 22px;
     --shadow-card: 0 1px 2px rgba(10,24,52,.04), 0 4px 16px rgba(37,99,235,.06);
     --shadow-overlay: 0 10px 28px rgba(10,24,52,.15);
@@ -61,7 +60,7 @@
   .sec-title { display:flex; align-items:center; gap:9px; font-size: 14px; font-weight: 700; margin: 24px 2px 12px; letter-spacing: -.01em; }
   .sec-title::before { content:""; width: 3px; height: 13px; border-radius: 2px; background: linear-gradient(180deg, var(--accent), var(--module-2)); }
 
-  .greet { position: relative; overflow: hidden; margin-top: 10px; padding: 22px 20px 24px; border-radius: var(--radius-card); border: 1px solid var(--border); box-shadow: var(--shadow-card), 0 0 24px rgba(37,99,235,.10); min-height: 132px; background: var(--greet-image) center right / cover no-repeat, #1a2a4a; }
+  .greet { position: relative; overflow: hidden; margin-top: 10px; padding: 22px 20px 24px; border-radius: var(--radius-card); border: 1px solid var(--border); box-shadow: var(--shadow-card), 0 0 24px rgba(37,99,235,.10); min-height: 132px; background-image: url('assets/greet-banner.jpg'); background-position: center right; background-size: cover; background-repeat: no-repeat; background-color: #1a2a4a; }
   .greet::before { content:""; position:absolute; inset:0; pointer-events:none; background: linear-gradient(90deg, rgba(232,241,252,.94) 0%, rgba(232,241,252,.80) 38%, rgba(232,241,252,.12) 65%, transparent 100%); }
   .greet > * { position: relative; z-index: 1; }
   .bureau-badge { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; letter-spacing:.03em; padding: 4px 11px; border-radius: 999px; background: rgba(37,99,235,.12); color: var(--accent); margin-bottom: 10px; backdrop-filter: blur(4px); }
@@ -127,7 +126,7 @@
   .hero-bar { height: 5px; border-radius: 999px; background: var(--border); overflow:hidden; margin-top: 10px; } .hero-bar i { display:block; height:100%; border-radius:999px; }
 
   /* module tabs */
-  .mod-tabs { display:flex; gap:0; margin-bottom:14px; background:var(--surface-nested); border-radius:var(--radius-tile); padding:3px; border:1px solid var(--border); }
+  .mod-tabs { display:flex; gap:0; margin-top:14px; margin-bottom:14px; background:var(--surface-nested); border-radius:var(--radius-tile); padding:3px; border:1px solid var(--border); }
   .mod-tabs .tab { flex:1; text-align:center; padding:9px 4px; border-radius:var(--radius-control); font-size:13px; font-weight:600; color:var(--text-secondary); cursor:pointer; transition:all .15s; border:none; background:none; font-family:var(--font); }
   .mod-tabs .tab.on { background:var(--surface-card); color:var(--accent); box-shadow:var(--shadow-card); }
 
