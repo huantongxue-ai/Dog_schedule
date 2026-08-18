@@ -1,6 +1,6 @@
-const CACHE_NAME = "time-bureau-v1";
+const CACHE_NAME = "time-bureau-v2";
 const ASSETS = [
-  "workbench-mobile.html",
+  "index.html",
   "manifest.json",
   "icon-192.png",
   "icon-512.png",
@@ -31,7 +31,7 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return response;
-      }).catch(() => caches.match("workbench-mobile.html"));
+      }).catch(() => caches.match("index.html"));
     })
   );
 });

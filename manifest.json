@@ -2,7 +2,7 @@
   "name": "时间管理局 · 狗狗日程报",
   "short_name": "时间管理局",
   "description": "卡通小狗 × 未来时间管理局风格的个人工作台，记录每日计划、待办、长期目标和总结。",
-  "start_url": "workbench-mobile.html",
+  "start_url": "index.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#e8f1fc",
