@@ -46,6 +46,19 @@
   .topbar .title small { display:block; font-size: 11px; font-weight: 500; color: var(--text-secondary); letter-spacing:.02em; margin-top: 2px; }
   .date-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); background: var(--surface-card); border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; box-shadow: var(--shadow-card); }
   .date-chip svg { color: var(--text-tertiary); }
+  .icon-btn { width:38px; height:38px; border:1px solid var(--border); border-radius:12px; background:linear-gradient(135deg, var(--surface-card), color-mix(in srgb, var(--surface-card) 88%, var(--accent) 12%)); box-shadow:0 2px 8px rgba(37,99,235,.10); display:grid; place-items:center; cursor:pointer; color:var(--accent); flex:0 0 auto; position:relative; transition: all .2s ease; }
+  .icon-btn:active { transform:scale(.92); box-shadow:0 1px 4px rgba(37,99,235,.15); }
+  .icon-btn.connected { background:linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, var(--surface-card)), color-mix(in srgb, var(--accent) 16%, var(--surface-card))); border-color:color-mix(in srgb, var(--accent) 30%, var(--border)); }
+  .sync-badge { position:absolute; top:-2px; right:-2px; width:10px; height:10px; border-radius:999px; background:var(--module-1); border:2px solid var(--surface-card); box-shadow:0 0 0 1px var(--border); }
+  .sync-badge.off { background:var(--text-tertiary); animation: pulse-dot 2s ease-in-out infinite; }
+  @keyframes pulse-dot { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.4; transform:scale(.8); } }
+
+  .sync-status { display:flex; align-items:center; gap:8px; padding:12px 14px; border-radius:var(--radius-card); background:var(--surface-nested); margin-bottom:14px; }
+  .sync-status .ss-icon { width:36px; height:36px; border-radius:var(--radius-tile); display:grid; place-items:center; flex:0 0 auto; }
+  .sync-status .ss-text { flex:1; min-width:0; }
+  .sync-status .ss-title { font-size:14px; font-weight:700; }
+  .sync-status .ss-sub { font-size:11px; color:var(--text-secondary); margin-top:2px; }
+  .sync-link { display:block; text-align:center; font-size:12px; color:var(--accent); padding:10px; border:1px dashed var(--border-input); border-radius:var(--radius-tile); margin-bottom:12px; text-decoration:none; }
 
   .card { background: var(--surface-card); border: 1px solid var(--border); border-radius: var(--radius-card); box-shadow: var(--shadow-card); }
   .sec-title { display:flex; align-items:center; gap:9px; font-size: 14px; font-weight: 700; margin: 24px 2px 12px; letter-spacing: -.01em; }
@@ -149,13 +162,7 @@
   .alert-banner .ab-item .ab-delay { flex:0 0 auto; font-size:11px; font-weight:700; color:#ef4444; background:#fee2e2; padding:2px 7px; border-radius:999px; }
   .alert-banner .ab-item .ab-title { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-  .data-mgmt { margin-top: 14px; padding: 14px; }
-  .data-mgmt .dm-title { font-size:13px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:7px; }
-  .data-mgmt .dm-title svg { color:var(--text-tertiary); }
-  .data-mgmt .dm-desc { font-size:11px; color:var(--text-secondary); margin-bottom:12px; line-height:1.5; }
-  .data-mgmt .dm-btns { display:flex; gap:8px; }
-  .data-mgmt .dm-btn { flex:1; padding:11px; border-radius:var(--radius-tile); border:1px solid var(--border-input); background:var(--surface-nested); color:var(--text); font-size:13px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; font-family:var(--font); }
-  .data-mgmt .dm-btn:active { background:var(--accent-muted); border-color:var(--accent); }
+  .data-mgmt { display: none; }
 
   .nav { position: fixed; left: 50%; transform: translateX(-50%); bottom: 0; width: 100%; max-width: 480px; height: var(--nav-h); background: rgba(255,255,255,.92); backdrop-filter: blur(14px); border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(4,1fr); align-items: center; z-index: 30; padding-bottom: env(safe-area-inset-bottom); }
   .nav .n { display:flex; flex-direction:column; align-items:center; gap: 4px; cursor:pointer; color: var(--text-tertiary); font-size: 10px; font-weight: 500; } .nav .n.active { color: var(--accent); font-weight: 700; }
@@ -191,7 +198,8 @@
 <div class="app">
   <div class="topbar">
     <div class="title" id="topTitle">时间管理局<small id="topSub">Time Bureau · 狗狗日程报</small></div>
-    <span class="date-chip" id="dateChip"></span>
+  <span class="date-chip" id="dateChip"></span>
+  <button class="icon-btn" id="btn-sync-settings" title="云端同步"></button>
   </div>
   <div id="screen"></div>
 </div>
@@ -295,6 +303,10 @@ const ICONS = {
   moon:'<path d="M20 14.5A8 8 0 1 1 9.5 4 6.5 6.5 0 0 0 20 14.5z"/>',
   download:'<path d="M12 3v12"/><path d="M7 11l5 4 5-4"/><path d="M5 20h14"/>',
   upload:'<path d="M12 21V9"/><path d="M7 13l5-4 5 4"/><path d="M5 4h14"/>',
+  settings:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+  cloud:'<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>',
+  refresh:'<path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/>',
+  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
 };
 function icon(name, size=22, sw=1.7){ const path = ICONS[name] || ICONS.grid; return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`; }
 
@@ -328,7 +340,145 @@ const store = {
 };
 let data = store.load();
 let view = "home";
-function persist(){ store.save(); render(); }
+
+/* ---- cloud sync (GitHub Gist) ---- */
+const syncStore = {
+  get token(){ return localStorage.getItem("gh_token")||""; },
+  set token(v){ if(v) localStorage.setItem("gh_token",v); else localStorage.removeItem("gh_token"); },
+  get gistId(){ return localStorage.getItem("gist_id")||""; },
+  set gistId(v){ if(v) localStorage.setItem("gist_id",v); else localStorage.removeItem("gist_id"); },
+  get lastSync(){ return localStorage.getItem("last_sync")||""; },
+  set lastSync(v){ if(v) localStorage.setItem("last_sync",v); else localStorage.removeItem("last_sync"); },
+  get connected(){ return !!this.token && !!this.gistId; },
+};
+let syncPushTimer = null;
+let syncPulling = false;
+
+function gistApi(method, path, body){
+  return fetch(`https://api.github.com${path}`, {
+    method, headers: { "Authorization": `Bearer ${syncStore.token}`, "Accept": "application/vnd.github+json", "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+}
+
+async function syncConnect(token){
+  syncStore.token = token;
+  const desc = "时间管理局数据备份 (私有)";
+  const listRes = await gistApi("GET", "/gists?per_page=100");
+  if(listRes.ok){
+    const gists = await listRes.json();
+    const existing = gists.find(g=>g.description===desc && g.files && g.files["time-bureau-data.json"]);
+    if(existing){
+      syncStore.gistId = existing.id;
+      syncStore.lastSync = new Date().toISOString();
+      await syncPull();
+      render();
+      return existing;
+    }
+  }
+  const res = await gistApi("POST", "/gists", {
+    description: desc, public: false,
+    files: { "time-bureau-data.json": { content: JSON.stringify(data, null, 2) } },
+  });
+  if(!res.ok){ syncStore.token=""; const err=await res.json().catch(()=>({})); throw new Error(err.message||`HTTP ${res.status}`); }
+  const gist = await res.json();
+  syncStore.gistId = gist.id;
+  syncStore.lastSync = new Date().toISOString();
+  return gist;
+}
+
+async function syncPull(){
+  if(!syncStore.connected) return null;
+  syncPulling = true;
+  try {
+    const res = await gistApi("GET", `/gists/${syncStore.gistId}`);
+    if(!res.ok) return null;
+    const gist = await res.json();
+    const file = gist.files && gist.files["time-bureau-data.json"];
+    if(!file || !file.content) return null;
+    const remote = JSON.parse(file.content);
+    const remoteT = remote._syncedAt || "";
+    const localT = data._syncedAt || "";
+    if(remoteT > localT){
+      data = remote;
+      delete data._syncedAt;
+      store.save();
+    }
+    syncStore.lastSync = new Date().toISOString();
+    return remote;
+  } catch(e){ return null; } finally { syncPulling = false; }
+}
+
+async function syncPush(){
+  if(!syncStore.connected) return;
+  const snapshot = JSON.parse(JSON.stringify(data));
+  snapshot._syncedAt = new Date().toISOString();
+  try {
+    const res = await gistApi("PATCH", `/gists/${syncStore.gistId}`, {
+      files: { "time-bureau-data.json": { content: JSON.stringify(snapshot, null, 2) } },
+    });
+    if(res.ok) syncStore.lastSync = new Date().toISOString();
+  } catch(e){}
+}
+
+function syncPushDebounced(){
+  if(!syncStore.connected) return;
+  clearTimeout(syncPushTimer);
+  syncPushTimer = setTimeout(()=>syncPush(), 3000);
+}
+
+function persist(){ store.save(); render(); syncPushDebounced(); }
+
+function openSyncSettings(){
+  const connected = syncStore.connected;
+  const lastText = syncStore.lastSync ? formatTime(syncStore.lastSync) : "从未同步";
+  const overlay = document.createElement("div");
+  overlay.className = "overlay";
+  overlay.innerHTML = `<div class="modal"><div class="grab"></div>
+    <h2>${icon("cloud",18)} 云端同步</h2>
+    <div class="sub">通过 GitHub Gist 在多设备间同步数据，数据存储在你的私有 Gist 中。</div>
+    ${connected ? `<div class="sync-status"><div class="ss-icon" style="background:var(--accent-muted);color:var(--accent)">${icon("cloud",18)}</div><div class="ss-text"><div class="ss-title">已连接</div><div class="ss-sub">上次同步：${lastText}</div></div></div>
+    <button class="btn" id="sync-now" style="width:100%;margin-bottom:10px">${icon("refresh",15)} 立即同步</button>
+    <button class="btn ghost" id="sync-disconnect" style="width:100%">断开连接</button>`
+    : `<a class="sync-link" href="https://github.com/settings/tokens/new?scopes=gist" target="_blank">点击生成 GitHub Token →</a>
+    <div class="field"><label>粘贴 Token</label><input id="sync-token-input" type="password" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off"/></div>
+    <div class="hint">Token 只需要 gist 权限，存储在本设备浏览器中，不会上传到任何服务器。</div>
+    <button class="btn" id="sync-connect">连接并同步</button>`}
+    <div style="margin-top:14px;padding:10px 12px;background:var(--surface-nested);border-radius:8px;font-size:11px;color:var(--text-secondary);line-height:1.5">${icon("info",13)} <b>使用方法：</b><br>1. 点击上方链接，在 GitHub 生成 Token（勾选 gist 权限）<br>2. 复制 Token 粘贴到输入框，点连接<br>3. 在另一台设备上输入同一个 Token 即可同步<br>4. 数据每次修改后自动推送，打开 App 时自动拉取</div>
+  </div>`;
+  document.body.appendChild(overlay);
+  const close = ()=>overlay.remove();
+  overlay.onclick = e=>{ if(e.target===overlay) close(); };
+  if(connected){
+    overlay.querySelector("#sync-now").onclick = async ()=>{
+      await syncPull(); syncPush(); render(); showToast("同步完成"); close();
+    };
+    overlay.querySelector("#sync-disconnect").onclick = ()=>{ syncStore.token=""; syncStore.gistId=""; syncStore.lastSync=""; close(); showToast("已断开连接"); };
+  } else {
+    overlay.querySelector("#sync-connect").onclick = async (e)=>{
+      const input = overlay.querySelector("#sync-token-input");
+      const token = input.value.trim();
+      if(!token){ showToast("请输入 Token"); return; }
+      e.target.disabled = true; e.target.textContent = "连接中…";
+      try {
+        await syncConnect(token);
+        showToast("连接成功，数据已备份"); close();
+      } catch(err){
+        showToast("连接失败: "+err.message);
+        e.target.disabled = false; e.target.textContent = "连接并同步";
+      }
+    };
+  }
+}
+
+function formatTime(iso){
+  const d = new Date(iso); const now = new Date();
+  const diff = (now - d) / 1000;
+  if(diff < 60) return "刚刚";
+  if(diff < 3600) return Math.floor(diff/60)+" 分钟前";
+  if(diff < 86400) return Math.floor(diff/3600)+" 小时前";
+  return d.toLocaleString("zh-CN", { month:"numeric", day:"numeric", hour:"2-digit", minute:"2-digit" });
+}
 
 /* ---- toast ---- */
 let toastTimer=null;
@@ -478,8 +628,6 @@ function renderHome(){
 
   const quick=CONFIG.quickAdd.map(q=>`<button class="qbtn" data-quick="${q.module}"${q.tab?` data-tab="${q.tab}"`:''}><span class="e" style="background:${q.tint};color:${q.color}">${icon(q.icon,20)}<i class="qplus">${icon("plus",10,3)}</i></span><span class="l">${q.label}</span></button>`).join("");
 
-  const dataMgmt=`<div class="panel data-mgmt"><div class="dm-title">${icon("download",15)} 数据备份</div><div class="dm-desc">数据存于本机浏览器，清除缓存会丢失。建议定期导出备份。</div><div class="dm-btns"><button class="dm-btn" id="dm-export">${icon("download",15)}导出备份</button><button class="dm-btn" id="dm-import">${icon("upload",15)}导入备份</button></div><input type="file" id="dm-file" accept=".json,application/json" hidden/></div>`;
-
   $("#screen").innerHTML=`
     <div class="greet"><div><span class="bureau-badge">🐶 时间管理局</span><h1>${hi}</h1><p>欢迎回到${CONFIG.owner}</p></div></div>
     ${alertBanner}
@@ -487,10 +635,8 @@ function renderHome(){
     <div class="sec-title">今日状态总览</div><div class="card rings">${rings}</div>
     <div class="sec-title">优先任务</div><div class="pin-list">${pinned}</div>
     <div class="sec-title">快速记录</div><div class="quick-grid">${quick}</div>
-    <div class="panel trend-panel"><div class="ph">${icon("chart",15)} ${CONFIG.trend.title}${hasTrend?`<span class="avg">均 ${avg}${CONFIG.trend.unit}</span>`:''}</div>${trend}${hasTrend?`<div class="trend-x"><span>${weekLabels()}</span></div>`:''}</div>
-    ${dataMgmt}`;
+    <div class="panel trend-panel"><div class="ph">${icon("chart",15)} ${CONFIG.trend.title}${hasTrend?`<span class="avg">均 ${avg}${CONFIG.trend.unit}</span>`:''}</div>${trend}${hasTrend?`<div class="trend-x"><span>${weekLabels()}</span></div>`:''}</div>`;
   wireHome();
-  wireDataMgmt();
 }
 
 function trendSVG(series){
@@ -514,17 +660,6 @@ function wireHome(){
   $("#screen").querySelectorAll(".js-pin-dec").forEach(el=>el.onclick=e=>{ e.stopPropagation(); const x=findGoal(el); if(x){ x.current=Math.max(0,(+x.current||0)-1); persist(); } });
   $("#screen").querySelectorAll(".js-pin-open").forEach(el=>el.onclick=()=>{ const mkey=el.dataset.mkey; if(mkey==="tasks"){ const x=findTask(el); const tab=x?.category||"daily"; modOf("tasks")._tab=tab; openEditor("tasks",x,tab); } else if(mkey==="goal") openEditor("goal",findGoal(el)); });
   $("#screen").querySelectorAll("[data-jump-task]").forEach(el=>el.onclick=()=>{ const x=(data.tasks||[]).find(i=>i.id==el.dataset.jumpTask); if(x){ modOf("tasks")._tab=x.category||"growth"; go("tasks"); openEditor("tasks",x,x.category); } });
-}
-
-function wireDataMgmt(){
-  const exportBtn=$("#dm-export"); if(exportBtn) exportBtn.onclick=()=>{
-    const json=JSON.stringify(data,null,2); const blob=new Blob([json],{type:"application/json"}); const url=URL.createObjectURL(blob);
-    const a=document.createElement("a"); a.href=url; a.download=`时间管理局备份_${today()}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-    showToast("备份已导出");
-  };
-  const importBtn=$("#dm-import"), fileInput=$("#dm-file");
-  if(importBtn) importBtn.onclick=()=>fileInput&&fileInput.click();
-  if(fileInput) fileInput.onchange=e=>{ const f=e.target.files&&e.target.files[0]; if(!f) return; const reader=new FileReader(); reader.onload=()=>{ try { const parsed=JSON.parse(reader.result); if(!parsed.tasks||!parsed.goal){ showToast("文件格式不正确"); return; } const overlay=document.createElement("div"); overlay.className="overlay"; overlay.innerHTML=`<div class="modal"><div class="grab"></div><h2>导入备份</h2><div class="sub">确定导入此备份吗？当前数据将被覆盖，此操作不可撤销。</div><div class="modal-actions"><button class="btn ghost" id="i-cancel">取消</button><button class="btn danger" id="i-ok">导入</button></div></div>`; document.body.appendChild(overlay); const close=()=>overlay.remove(); overlay.onclick=e=>{ if(e.target===overlay) close(); }; overlay.querySelector("#i-cancel").onclick=close; overlay.querySelector("#i-ok").onclick=()=>{ data=parsed; if(!data.archive) data.archive=[]; if(!data.reviews) data.reviews={daily:{},monthly:{}}; store.save(); close(); render(); showToast("备份已导入"); }; } catch(err){ showToast("文件解析失败"); } }; reader.readAsText(f); e.target.value=""; };
 }
 
 /* ---------- MODULE VIEW ---------- */
@@ -731,15 +866,25 @@ function render(){
   if(view==="home"){ $("#topTitle").firstChild.textContent=CONFIG.owner; $("#topSub").textContent=CONFIG.slogan; }
   else { const m=modOf(view); $("#topTitle").firstChild.textContent=m?m.name:CONFIG.owner; $("#topSub").textContent=m?m.desc:""; }
   $("#nav").querySelectorAll(".n").forEach(n=>n.classList.toggle("active",n.dataset.nav===view));
+  const sb = $("#btn-sync-settings"); if(sb){ sb.classList.toggle("connected", syncStore.connected); const badge = sb.querySelector(".sync-badge"); if(badge) badge.classList.toggle("off", !syncStore.connected); }
   if(view==="home") renderHome(); else renderModule(view);
 }
 
 $("#nav").querySelectorAll(".n").forEach(n=>n.onclick=()=>go(n.dataset.nav));
 
+const syncBtn = $("#btn-sync-settings");
+if(syncBtn){
+  syncBtn.innerHTML = icon("cloud",18) + (syncStore.connected ? '<span class="sync-badge"></span>' : '<span class="sync-badge off"></span>');
+  syncBtn.classList.toggle("connected", syncStore.connected);
+  syncBtn.onclick = ()=>openSyncSettings();
+}
+
 function esc(s){ return String(s??"").replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function attr(s){ return esc(s).replace(/"/g,'&quot;'); }
 
 render();
+
+if(syncStore.connected){ syncPull().then(()=>render()); }
 </script>
 <script>
 if ("serviceWorker" in navigator) {
