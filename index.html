@@ -393,19 +393,38 @@ function gistApi(method, path, body){
   });
 }
 
+function tokenTag(token){
+  let h = 0;
+  for(let i=0;i<token.length;i++){ h = ((h<<5)-h + token.charCodeAt(i)) | 0; }
+  return (h>>>0).toString(36);
+}
+
 async function syncConnect(token){
   syncStore.token = token;
-  const desc = "时间管理局数据备份 (私有)";
+  const tag = tokenTag(token);
+  const desc = `时间管理局数据备份 #${tag}`;
+  const legacyDesc = "时间管理局数据备份 (私有)";
   const listRes = await gistApi("GET", "/gists?per_page=100");
   if(listRes.ok){
     const gists = await listRes.json();
-    const existing = gists.find(g=>g.description===desc && g.files && g.files["time-bureau-data.json"]);
-    if(existing){
-      syncStore.gistId = existing.id;
+    const own = gists.find(g=>g.description===desc && g.files && g.files["time-bureau-data.json"]);
+    if(own){
+      syncStore.gistId = own.id;
       syncStore.lastSync = new Date().toISOString();
       await syncPull();
       render();
-      return existing;
+      return own;
+    }
+    const legacy = gists.find(g=>g.description===legacyDesc && g.files && g.files["time-bureau-data.json"]);
+    if(legacy){
+      const claim = await gistApi("PATCH", `/gists/${legacy.id}`, { description: desc });
+      if(claim.ok){
+        syncStore.gistId = legacy.id;
+        syncStore.lastSync = new Date().toISOString();
+        await syncPull();
+        render();
+        return legacy;
+      }
     }
   }
   const res = await gistApi("POST", "/gists", {
@@ -423,10 +442,24 @@ async function syncPull(){
   if(!syncStore.connected) return null;
   syncPulling = true;
   try {
+    let gist = null;
     const res = await gistApi("GET", `/gists/${syncStore.gistId}`);
-    if(!res.ok) return null;
-    const gist = await res.json();
-    const file = gist.files && gist.files["time-bureau-data.json"];
+    if(res.ok) gist = await res.json();
+    if(gist){
+      const tag = tokenTag(syncStore.token);
+      const myDesc = `时间管理局数据备份 #${tag}`;
+      const legacyDesc = "时间管理局数据备份 (私有)";
+      if(gist.description !== myDesc){
+        if(gist.description === legacyDesc){
+          await gistApi("PATCH", `/gists/${syncStore.gistId}`, { description: myDesc });
+        } else {
+          syncPulling = false;
+          await syncConnect(syncStore.token);
+          return await syncPull();
+        }
+      }
+    }
+    const file = gist && gist.files && gist.files["time-bureau-data.json"];
     if(!file || !file.content) return null;
     const remote = JSON.parse(file.content);
     const remoteT = remote._syncedAt || "";
@@ -468,15 +501,15 @@ function openSyncSettings(){
   overlay.className = "overlay";
   overlay.innerHTML = `<div class="modal"><div class="grab"></div>
     <h2>${icon("cloud",18)} 云端同步</h2>
-    <div class="sub">通过 GitHub Gist 在多设备间同步数据，数据存储在你的私有 Gist 中。</div>
+    <div class="sub">通过 GitHub Gist 同步数据，每个 Token 绑定一份数据（不同 Token 数据相互独立）。数据存储在你的私有 Gist 中。</div>
     ${connected ? `<div class="sync-status"><div class="ss-icon" style="background:var(--accent-muted);color:var(--accent)">${icon("cloud",18)}</div><div class="ss-text"><div class="ss-title">已连接</div><div class="ss-sub">上次同步：${lastText}</div></div></div>
     <button class="btn" id="sync-now" style="width:100%;margin-bottom:10px">${icon("refresh",15)} 立即同步</button>
     <button class="btn ghost" id="sync-disconnect" style="width:100%">断开连接</button>`
     : `<a class="sync-link" href="https://github.com/settings/tokens/new?scopes=gist" target="_blank">点击生成 GitHub Token →</a>
     <div class="field"><label>粘贴 Token</label><input id="sync-token-input" type="password" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off"/></div>
-    <div class="hint">Token 只需要 gist 权限，存储在本设备浏览器中，不会上传到任何服务器。</div>
+    <div class="hint">Token 只需 gist 权限，存于本设备浏览器；建议生成经典 Token 时选 No expiration，避免过期后该份数据失联。</div>
     <button class="btn" id="sync-connect">连接并同步</button>`}
-    <div style="margin-top:14px;padding:10px 12px;background:var(--surface-nested);border-radius:8px;font-size:11px;color:var(--text-secondary);line-height:1.5">${icon("info",13)} <b>使用方法：</b><br>1. 点击上方链接，在 GitHub 生成 Token（勾选 gist 权限）<br>2. 复制 Token 粘贴到输入框，点连接<br>3. 在另一台设备上输入同一个 Token 即可同步<br>4. 数据每次修改后自动推送，打开 App 时自动拉取</div>
+    <div style="margin-top:14px;padding:10px 12px;background:var(--surface-nested);border-radius:8px;font-size:11px;color:var(--text-secondary);line-height:1.5">${icon("info",13)} <b>使用方法：</b><br>1. 点击上方链接，在 GitHub 生成经典 Token（勾选 gist 权限，可选 No expiration）<br>2. 复制 Token 粘贴到输入框，点连接<br>3. 在另一台设备输入同一 Token 即可同步该份数据<br>4. 想要另一份独立数据？生成另一个 Token 连接即可<br>5. 数据每次修改后自动推送，打开 App 时自动拉取</div>
   </div>`;
   document.body.appendChild(overlay);
   const close = ()=>overlay.remove();
